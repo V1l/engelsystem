@@ -308,17 +308,17 @@ return [
 
     // Available T-Shirt sizes, set value to null if not available
     'tshirt_sizes'            => [
-        'S'    => 'Small Straight-Cut',
-        'S-G'  => 'Small Fitted-Cut',
-        'M'    => 'Medium Straight-Cut',
-        'M-G'  => 'Medium Fitted-Cut',
-        'L'    => 'Large Straight-Cut',
-        'L-G'  => 'Large Fitted-Cut',
-        'XL'   => 'XLarge Straight-Cut',
-        'XL-G' => 'XLarge Fitted-Cut',
-        '2XL'  => '2XLarge Straight-Cut',
-        '3XL'  => '3XLarge Straight-Cut',
-        '4XL'  => '4XLarge Straight-Cut',
+ 'Ticket'    => '100% Ticketpfand erhalten',
+        '90'  => '90€ erhalten',
+        '80'    => '80€ erhalten',
+        '70'  => '70€ erhalten',
+        '60'    => '60€ erhalten',
+        '50'  => '50€ erhalten',
+        '40'   => '40€ erhalten',
+        '30' => '30€ erhalten',
+        '20'  => '20€ erhalten',
+        '10'  => '10€ erhalten',
+        '5'  => '5€ erhalten',
     ],
 
     // List of codes which are valid for registration

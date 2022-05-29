@@ -11,7 +11,8 @@ class Translator extends EngelsystemTranslator
         // EN
         'Supporter' => 'Chief',
         'T-Shirt' => 'Ticket-Pfand',
-        'Shirt' => 'Ticket',
+        'Shirt' => 'Ticket-Pfand',
+        'Ticket größe' => 'Ticket-Pfand',
 
 
         // DE
