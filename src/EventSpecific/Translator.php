@@ -9,23 +9,13 @@ class Translator extends EngelsystemTranslator
     /** @var array */
     protected $replacements = [
         // EN
-        'Angeltypes' => 'Daemontypes',
-        'angeltypes' => 'daemontypes',
-        'Angeltype'  => 'Daemontype',
-        'Angels'     => 'Daemons',
-        'angels'     => 'daemons',
-        'Angel'      => 'Daemon',
-        'Heaven'     => 'Hell',
-        'helpers'    => 'daemons',
-        'helper'     => 'daemon',
+        'Supporter' => 'Chief',
+        'T-Shirt' => 'Ticket-Pfand',
+        'Shirt' => 'Ticket',
+
 
         // DE
-        'Engeltypen' => 'Dämonarten',
-        'Engeltyp'   => 'Dämonart',
-        'Engel'      => 'Dämonen',
-        'den Himmel' => 'die Hölle',
-        'Himmel'     => 'Hölle',
-        'Helfer'     => 'Dämonen',
+        
     ];
 
     /**
