@@ -1,6 +1,6 @@
 <?php
 
-use Engelsystem\Database\Db;
+use Engelsystem\Database\DB;
 use Engelsystem\Models\User\User;
 
 /**
@@ -44,7 +44,7 @@ function admin_user()
             . page_link_to('admin_user', ['action' => 'save', 'id' => $user_id])
             . '" method="post">' . "\n";
         $html .= form_csrf();
-        $html .= '<table border="0">' . "\n";
+        $html .= '<table>' . "\n";
         $html .= '<input type="hidden" name="Type" value="Normal">' . "\n";
         $html .= '<tr><td>' . "\n";
         $html .= '<table>' . "\n";
@@ -100,7 +100,7 @@ function admin_user()
         $html .= '  <tr><td>T-Shirt</td><td>' . "\n";
         $html .= html_options('eTshirt', $options, $user_source->state->got_shirt) . '</td></tr>' . "\n";
 
-        $html .= '</table>' . "\n" . '</td><td valign="top"></td></tr>';
+        $html .= '</table>' . "\n" . '</td><td></td></tr>';
 
         $html .= '</td></tr>' . "\n";
         $html .= '</table>' . "\n" . '<br />' . "\n";
@@ -125,7 +125,7 @@ function admin_user()
 
         $html .= '<hr />';
 
-        $my_highest_group = DB::selectOne(
+        $my_highest_group = Db::selectOne(
             'SELECT group_id FROM `UserGroups` WHERE `uid`=? ORDER BY `group_id` LIMIT 1',
             [$user->id]
         );
@@ -133,7 +133,7 @@ function admin_user()
             $my_highest_group = $my_highest_group['group_id'];
         }
 
-        $his_highest_group = DB::selectOne(
+        $his_highest_group = Db::selectOne(
             'SELECT `group_id` FROM `UserGroups` WHERE `uid`=? ORDER BY `group_id` LIMIT 1',
             [$user_id]
         );
@@ -151,7 +151,7 @@ function admin_user()
             $html .= form_csrf();
             $html .= '<table>';
 
-            $groups = DB::select('
+            $groups = Db::select('
                     SELECT *
                     FROM `Groups`
                     LEFT OUTER JOIN `UserGroups` ON (
@@ -189,11 +189,11 @@ function admin_user()
         switch ($request->input('action')) {
             case 'save_groups':
                 if ($user_id != $user->id || auth()->can('admin_groups')) {
-                    $my_highest_group = DB::selectOne(
+                    $my_highest_group = Db::selectOne(
                         'SELECT * FROM `UserGroups` WHERE `uid`=? ORDER BY `group_id`',
                         [$user->id]
                     );
-                    $his_highest_group = DB::selectOne(
+                    $his_highest_group = Db::selectOne(
                         'SELECT * FROM `UserGroups` WHERE `uid`=? ORDER BY `group_id`',
                         [$user_id]
                     );
@@ -205,7 +205,7 @@ function admin_user()
                             || ($my_highest_group['group_id'] <= $his_highest_group['group_id'])
                         )
                     ) {
-                        $groups_source = DB::select('
+                        $groups_source = Db::select('
                                 SELECT *
                                 FROM `Groups`
                                 LEFT OUTER JOIN `UserGroups` ON (
@@ -232,11 +232,11 @@ function admin_user()
                             $groupsRequest = [];
                         }
 
-                        DB::delete('DELETE FROM `UserGroups` WHERE `uid`=?', [$user_id]);
+                        Db::delete('DELETE FROM `UserGroups` WHERE `uid`=?', [$user_id]);
                         $user_groups_info = [];
                         foreach ($groupsRequest as $group) {
                             if (in_array($group, $grouplist)) {
-                                DB::insert(
+                                Db::insert(
                                     'INSERT INTO `UserGroups` (`uid`, `group_id`) VALUES (?, ?)',
                                     [$user_id, $group]
                                 );

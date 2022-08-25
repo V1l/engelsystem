@@ -1,10 +1,8 @@
 require('core-js/stable');
 window.$ = window.jQuery = require('jquery');
-require('jquery-ui');
 window.bootstrap = require('bootstrap');
 window.moment = require('moment');
 require('moment/locale/de');
-require('chart.js');
 require('./forms');
 require('./sticky-headers');
 require('./moment-countdown');

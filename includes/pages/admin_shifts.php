@@ -2,7 +2,10 @@
 
 use Engelsystem\Database\Db;
 use Engelsystem\Helpers\Carbon;
+use Engelsystem\Http\Exceptions\HttpForbidden;
 use Engelsystem\Models\Room;
+use Engelsystem\Models\User\User;
+use Illuminate\Support\Str;
 
 /**
  * @return string
@@ -24,7 +27,7 @@ function admin_shifts()
     $session = session();
     $start = Carbon::createTimestampFromDatetime(date('Y-m-d') . 'T00:00');
     $end = $start;
-    $mode = 'single';
+    $mode = '';
     $angelmode = 'manually';
     $length = '';
     $change_hours = [];
@@ -42,7 +45,7 @@ function admin_shifts()
     }
 
     // Engeltypen laden
-    $types = DB::select('SELECT * FROM `AngelTypes` ORDER BY `name`');
+    $types = Db::select('SELECT * FROM `AngelTypes` ORDER BY `name`');
     $needed_angel_types = [];
     foreach ($types as $type) {
         $needed_angel_types[$type['id']] = 0;
@@ -147,7 +150,6 @@ function admin_shifts()
             if ($request->input('angelmode') == 'location') {
                 $angelmode = 'location';
             } elseif ($request->input('angelmode') == 'manually') {
-                $angelmode = 'manually';
                 foreach ($types as $type) {
                     if (preg_match('/^\d+$/', trim($request->input('type_' . $type['id'], 0)))) {
                         $needed_angel_types[$type['id']] = trim($request->input('type_' . $type['id'], 0));
@@ -179,7 +181,7 @@ function admin_shifts()
         if ($valid) {
             if ($angelmode == 'location') {
                 $needed_angel_types = [];
-                $needed_angel_types_location = DB::select(
+                $needed_angel_types_location = Db::select(
                     '
                         SELECT `angel_type_id`, `count`
                         FROM `NeededAngelTypes`
@@ -363,9 +365,10 @@ function admin_shifts()
             throw_redirect(page_link_to('admin_shifts'));
         }
 
+        $transactionId = Str::uuid();
         foreach ($session->get('admin_shifts_shifts', []) as $shift) {
             $shift['URL'] = null;
-            $shift_id = Shift_create($shift);
+            $shift_id = Shift_create($shift, $transactionId);
 
             engelsystem_log(
                 'Shift created: ' . $shifttypes[$shift['shifttype_id']]
@@ -373,18 +376,19 @@ function admin_shifts()
                 . ' with description ' . $shift['description']
                 . ' from ' . date('Y-m-d H:i', $shift['start'])
                 . ' to ' . date('Y-m-d H:i', $shift['end'])
+                . ', transaction: ' . $transactionId
             );
 
             $needed_angel_types_info = [];
             foreach ($session->get('admin_shifts_types', []) as $type_id => $count) {
-                $angel_type_source = DB::selectOne('
+                $angel_type_source = Db::selectOne('
                     SELECT *
                     FROM `AngelTypes`
                     WHERE `id` = ?
                     LIMIT 1', [$type_id]);
 
                 if (!empty($angel_type_source)) {
-                    DB::insert('
+                    Db::insert('
                         INSERT INTO `NeededAngelTypes` (`shift_id`, `angel_type_id`, `count`)
                         VALUES (?, ?, ?)
                         ',
@@ -424,7 +428,12 @@ function admin_shifts()
             . '</div>';
     }
 
-    return page_with_title(admin_shifts_title(), [
+    return page_with_title(
+        admin_shifts_title() . ' ' .  sprintf(
+            '<a href="%s">%s</a>',
+            page_link_to('admin_shifts_history'),
+            icon('clock-history')
+        ), [
         msg(),
         form([
             div('row',[
@@ -442,7 +451,7 @@ function admin_shifts()
                 div('col-md-6', [
                     form_datetime('start', __('Start'), $start),
                     form_datetime('end', __('End'), $end),
-                    form_info(__('Mode'), ''),
+                    form_info(__('Mode')),
                     form_radio('mode', __('Create one shift'), $mode == 'single', 'single'),
                     form_radio('mode', __('Create multiple shifts'), $mode == 'multi', 'multi'),
                     form_text(
@@ -472,7 +481,7 @@ function admin_shifts()
                     )
                 ]),
                 div('col-md-6', [
-                    form_info(__('Needed angels'), ''),
+                    form_info(__('Needed angels')),
                     form_radio(
                         'angelmode',
                         __('Take needed angels from room settings'),
@@ -493,4 +502,91 @@ function admin_shifts()
             form_submit('preview', icon('search') . __('Preview'))
         ])
     ]);
+}
+
+/**
+ * @return string
+ */
+function admin_shifts_history_title(): string
+{
+    return __('Shifts history');
+}
+
+/**
+ * Display shifts transaction history
+ *
+ * @return string
+ */
+function admin_shifts_history(): string
+{
+    if (!auth()->can('admin_shifts')) {
+        throw new HttpForbidden();
+    }
+
+    $request = request();
+    $transactionId = $request->postData('transaction_id');
+    if ($request->hasPostData('delete') && $transactionId) {
+        $shifts = Db::select('
+            SELECT SID
+            FROM Shifts
+            WHERE transaction_id = ?
+        ', [$transactionId]);
+
+        engelsystem_log('Deleting ' . count($shifts) . ' shifts (transaction id ' . $transactionId . ')');
+
+        foreach ($shifts as $shift) {
+            $shift = Shift($shift['SID']);
+            UserWorkLog_from_shift($shift);
+            shift_delete($shift['SID']);
+
+            engelsystem_log(
+                'Deleted shift ' . $shift['name']
+                . ' from ' . date('Y-m-d H:i', $shift['start'])
+                . ' to ' . date('Y-m-d H:i', $shift['end'])
+            );
+        }
+
+        success(sprintf(__('%s shifts deleted.'), count($shifts)));
+        throw_redirect(page_link_to('admin_shifts_history'));
+    }
+
+    $shifts = Db::select('
+        SELECT
+            transaction_id,
+            title,
+            COUNT(SID) AS count,
+            MIN(start) AS start,
+            MAX(end) AS end,
+            created_by_user_id AS user_id,
+            created_at_timestamp AS created_at
+        FROM Shifts
+        WHERE transaction_id IS NOT NULL
+        GROUP BY transaction_id
+        ORDER BY transaction_id DESC
+    ');
+
+    foreach ($shifts as &$shift) {
+        $shift['user'] = User_Nick_render(User::find($shift['user_id']));
+        $shift['start'] = Carbon::createFromTimestamp($shift['start'])->format(__('Y-m-d H:i'));
+        $shift['end'] = Carbon::createFromTimestamp($shift['end'])->format(__('Y-m-d H:i'));
+        $shift['created_at'] = Carbon::createFromTimestamp($shift['created_at'])->format(__('Y-m-d H:i'));
+        $shift['actions'] = form([
+            form_hidden('transaction_id', $shift['transaction_id']),
+            form_submit('delete', icon('trash') . __('delete all'), 'btn-sm', true, 'danger'),
+        ]);
+    }
+
+    return page_with_title(admin_shifts_history_title(), [
+        msg(),
+        table([
+            'transaction_id' => __('ID'),
+            'title'          => __('Title'),
+            'count'          => __('Count'),
+            'start'          => __('Start'),
+            'end'            => __('End'),
+            'user'           => __('User'),
+            'created_at'     => __('Created'),
+            'actions'        => ''
+        ], $shifts)
+    ], true);
 }

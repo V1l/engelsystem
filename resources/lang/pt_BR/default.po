@@ -1063,11 +1063,6 @@ msgstr "Autor"
 msgid "Subject"
 msgstr "Assunto"
 
-#: includes/pages/admin_news.php:33 includes/pages/user_messages.php:79
-#: includes/pages/user_news.php:106 includes/pages/user_news.php:162
-msgid "Message"
-msgstr "Mensagem"
-
 #: includes/pages/admin_news.php:34 includes/pages/user_news.php:163
 msgid "Meeting"
 msgstr "Reunião"
@@ -1453,10 +1448,6 @@ msgstr "Por favor leia sobre as tarefas que pode realizar para nos ajudar."
 msgid "Please sign up, if you want to help us!"
 msgstr "Se você quer nos ajudar, por favor se registre!"
 
-#: includes/pages/user_messages.php:4
-msgid "Messages"
-msgstr "Mensagens"
-
 #: includes/pages/user_messages.php:26
 msgid "Select recipient..."
 msgstr "Selecionar recipiente..."
@@ -1622,10 +1613,6 @@ msgstr "-> não OK. Por favor tente novamente."
 #: includes/pages/user_settings.php:101
 msgid "Failed setting password."
 msgstr "A alteração da senha falhaou."
-
-#: includes/pages/user_settings.php:126
-msgid "Theme changed."
-msgstr "Tema alterado."
 
 #: includes/pages/user_shifts.php:82
 msgid "The administration has not configured any rooms yet."
@@ -2219,22 +2206,6 @@ msgstr "Nova senha:"
 #: includes/view/User_view.php:64
 msgid "Password confirmation:"
 msgstr "Confirmação de senha:"
-
-#: includes/view/User_view.php:68
-msgid "Here you can choose your color settings:"
-msgstr "Aqui você pode selecionar sua configuração de cor:"
-
-#: includes/view/User_view.php:69
-msgid "Color settings:"
-msgstr "Configuração de cor:"
-
-#: includes/view/User_view.php:73
-msgid "Here you can choose your language:"
-msgstr "Aqui você pode selecionar seu idioma:"
-
-#: includes/view/User_view.php:74
-msgid "Language:"
-msgstr "Idioma:"
 
 #: includes/view/User_view.php:88
 msgid "Registration successful"

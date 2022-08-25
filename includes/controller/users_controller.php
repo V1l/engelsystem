@@ -19,7 +19,7 @@ function users_controller()
     $request = request();
 
     if (!$user) {
-        throw_redirect(page_link_to(''));
+        throw_redirect(page_link_to());
     }
 
     $action = 'list';
@@ -58,7 +58,7 @@ function user_delete_controller()
     }
 
     if (!auth()->can('admin_user')) {
-        throw_redirect(page_link_to(''));
+        throw_redirect(page_link_to());
     }
 
     // You cannot delete yourself
@@ -146,8 +146,11 @@ function user_edit_vouchers_controller()
         $user_source = $user;
     }
 
-    if (!auth()->can('admin_user')) {
-        throw_redirect(page_link_to(''));
+    if (
+        (!auth()->can('admin_user') && !auth()->can('voucher.edit'))
+        || !config('enable_voucher')
+    ) {
+        throw_redirect(page_link_to());
     }
 
     if ($request->hasPostData('submit')) {
@@ -203,7 +206,7 @@ function user_controller()
     $shifts = Shifts_by_user($user_source->id, auth()->can('user_shifts_admin'));
     foreach ($shifts as &$shift) {
         // TODO: Move queries to model
-        $shift['needed_angeltypes'] = DB::select('
+        $shift['needed_angeltypes'] = Db::select('
             SELECT DISTINCT `AngelTypes`.*
             FROM `ShiftEntry`
             JOIN `AngelTypes` ON `ShiftEntry`.`TID`=`AngelTypes`.`id`
@@ -213,7 +216,7 @@ function user_controller()
             [$shift['SID']]
         );
         foreach ($shift['needed_angeltypes'] as &$needed_angeltype) {
-            $needed_angeltype['users'] = DB::select('
+            $needed_angeltype['users'] = Db::select('
                     SELECT `ShiftEntry`.`freeloaded`, `users`.*
                     FROM `ShiftEntry`
                     JOIN `users` ON `ShiftEntry`.`UID`=`users`.`id`
@@ -263,7 +266,7 @@ function users_list_controller()
     $request = request();
 
     if (!auth()->can('admin_user')) {
-        throw_redirect(page_link_to(''));
+        throw_redirect(page_link_to());
     }
 
     $order_by = 'name';
@@ -382,8 +385,6 @@ function shiftCalendarRendererByShiftFilter(ShiftsFilter $shiftsFilter)
     $filtered_shifts = [];
     foreach ($shifts as $shift) {
         $needed_angels_count = 0;
-        $taken = 0;
-
         foreach ($needed_angeltypes[$shift['SID']] as $needed_angeltype) {
             $taken = 0;
 

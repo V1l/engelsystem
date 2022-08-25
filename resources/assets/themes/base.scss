@@ -54,6 +54,7 @@ $form-label-font-weight: $font-weight-bold;
 @import "~select2/src/scss/core";
 @import "~select2-bootstrap-5-theme/src/include-all";
 @import "error";
+@import "barchart";
 
 $navbar-height: 3.125rem;
 
@@ -164,6 +165,18 @@ table a > .icon-icon_angel {
   .select2-search__field {
     background-color: lighten($input-bg, 10%) !important;
   }
+}
+
+// prevent dropdown-menu from overflowing the view
+.dropdown-menu {
+    max-height: calc(100vh - 300px); // 300px: menu offset
+    overflow: auto;
+}
+
+@media (min-width: map-get($grid-breakpoints, 'lg')) {
+    .dropdown-menu {
+        max-height: calc(100vh - $navbar-height - 16px); // 16px extra padding
+    }
 }
 
 .selection .checkbox {
@@ -347,4 +360,15 @@ code {
   a[href]:after {
     content: "";
   }
+}
+
+.conversation {
+  height: 55vh;
+  overflow-x: hidden;
+  overflow-y: auto
+}
+
+.message {
+  max-width: 75%;
+  display: inline-block;
 }

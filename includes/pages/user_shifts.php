@@ -1,6 +1,7 @@
 <?php
 
 use Engelsystem\Database\Db;
+use Engelsystem\Helpers\Carbon;
 use Engelsystem\Models\Room;
 use Engelsystem\ShiftsFilter;
 use Illuminate\Support\Collection;
@@ -49,9 +50,10 @@ function update_ShiftsFilter_timerange(ShiftsFilter $shiftsFilter, $days)
 {
     $start_time = $shiftsFilter->getStartTime();
     if (is_null($start_time)) {
+        $now = (new DateTime())->format('Y-m-d');
         $first_day = DateTime::createFromFormat(
             'Y-m-d',
-            $days[0] ?? (new DateTime())->format('Y-m-d')
+            in_array($now, $days) ? $now : ($days[0] ?? (new DateTime())->format('Y-m-d'))
         )->getTimestamp();
         if (time() < $first_day) {
             $start_time = $first_day;
@@ -61,8 +63,13 @@ function update_ShiftsFilter_timerange(ShiftsFilter $shiftsFilter, $days)
     }
 
     $end_time = $shiftsFilter->getEndTime();
-    if ($end_time == null) {
+    if (is_null($end_time)) {
         $end_time = $start_time + 24 * 60 * 60;
+        $end = Carbon::createFromTimestamp($end_time);
+        if (!in_array($end->format('Y-m-d'), $days)) {
+            $end->startOfDay()->subSecond(); // the day before
+            $end_time = $end->timestamp;
+        }
     }
 
     $shiftsFilter->setStartTime(check_request_datetime(
@@ -118,7 +125,7 @@ function load_rooms()
  */
 function load_days()
 {
-    $days = (new Collection(DB::select(
+    $days = (new Collection(Db::select(
         '
                 SELECT DISTINCT DATE(FROM_UNIXTIME(`start`)) AS `id`, DATE(FROM_UNIXTIME(`start`)) AS `name`
                 FROM `Shifts`
@@ -145,11 +152,11 @@ function load_types()
 {
     $user = auth()->user();
 
-    if (!count(DB::select('SELECT `id`, `name` FROM `AngelTypes`'))) {
+    if (!count(Db::select('SELECT `id`, `name` FROM `AngelTypes`'))) {
         error(__('The administration has not configured any angeltypes yet - or you are not subscribed to any angeltype.'));
         throw_redirect(page_link_to('/'));
     }
-    $types = DB::select('
+    $types = Db::select('
             SELECT
                 `AngelTypes`.`id`,
                 `AngelTypes`.`name`,
@@ -183,7 +190,7 @@ function load_types()
  */
 function unrestricted_angeltypes()
 {
-    return DB::select('SELECT `id`, `name` FROM `AngelTypes` WHERE `restricted` = 0');
+    return Db::select('SELECT `id`, `name` FROM `AngelTypes` WHERE `restricted` = 0');
 }
 
 /**

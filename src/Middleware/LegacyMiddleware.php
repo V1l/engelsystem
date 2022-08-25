@@ -27,6 +27,7 @@ class LegacyMiddleware implements MiddlewareInterface
         'users',
         'user_driver_licenses',
         'user_worklog',
+        'admin_shifts_history',
     ];
 
     /** @var ContainerInterface */
@@ -140,10 +141,6 @@ class LegacyMiddleware implements MiddlewareInterface
                 return [$title, $content];
             case 'user_worklog':
                 return user_worklog_controller();
-            case 'user_messages':
-                $title = messages_title();
-                $content = user_messages();
-                return [$title, $content];
             case 'user_settings':
                 $title = settings_title();
                 $content = user_settings();
@@ -180,6 +177,8 @@ class LegacyMiddleware implements MiddlewareInterface
                 $title = admin_shifts_title();
                 $content = admin_shifts();
                 return [$title, $content];
+            case 'admin_shifts_history':
+                return [admin_shifts_history_title(), admin_shifts_history()];
         }
 
         throw_redirect(page_link_to('login'));
@@ -202,7 +201,7 @@ class LegacyMiddleware implements MiddlewareInterface
             return response($content, (int)$page);
         }
 
-        if (strpos($content, '<html') !== false) {
+        if (strpos((string)$content, '<html') !== false) {
             return response($content);
         }
 

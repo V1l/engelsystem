@@ -24,7 +24,7 @@ function user_myshifts()
     if (
         $request->has('id')
         && auth()->can('user_shifts_admin')
-        && preg_match('/^\d{1,}$/', $request->input('id'))
+        && preg_match('/^\d+$/', $request->input('id'))
         && User::find($request->input('id'))
     ) {
         $shift_entry_id = $request->input('id');
@@ -48,7 +48,7 @@ function user_myshifts()
         ]);
     } elseif ($request->has('edit') && preg_match('/^\d+$/', $request->input('edit'))) {
         $shift_entry_id = $request->input('edit');
-        $shift = DB::selectOne('
+        $shift = Db::selectOne('
                 SELECT
                     `ShiftEntry`.`freeloaded`,
                     `ShiftEntry`.`freeload_comment`,

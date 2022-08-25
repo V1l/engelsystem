@@ -12,7 +12,7 @@ use Engelsystem\ShiftSignupState;
  */
 function Shifts_by_angeltype($angeltype)
 {
-    return DB::select('
+    return Db::select('
         SELECT DISTINCT `Shifts`.* FROM `Shifts`
         JOIN `NeededAngelTypes` ON `NeededAngelTypes`.`shift_id` = `Shifts`.`SID`
         LEFT JOIN schedule_shift AS s on Shifts.SID = s.shift_id
@@ -84,7 +84,7 @@ function Shifts_free($start, $end, ShiftsFilter $filter = null)
  */
 function Shifts_by_room(Room $room)
 {
-    return DB::select(
+    return Db::select(
         'SELECT * FROM `Shifts` WHERE `RID`=? ORDER BY `start`',
         [$room->id]
     );
@@ -128,7 +128,7 @@ function Shifts_by_ShiftsFilter(ShiftsFilter $shiftsFilter)
     ORDER BY `room_name`, `start`
     ';
 
-    return DB::select(
+    return Db::select(
         $sql,
         [
             $shiftsFilter->getStartTime(),
@@ -179,7 +179,7 @@ function NeededAngeltypes_by_ShiftsFilter(ShiftsFilter $shiftsFilter)
         AND NOT s.shift_id IS NULL
     ';
 
-    return DB::select(
+    return Db::select(
         $sql,
         [
             $shiftsFilter->getStartTime(),
@@ -197,7 +197,7 @@ function NeededAngeltypes_by_ShiftsFilter(ShiftsFilter $shiftsFilter)
  */
 function NeededAngeltype_by_Shift_and_Angeltype($shift, $angeltype)
 {
-    return DB::selectOne('
+    return Db::selectOne('
             SELECT
                 `NeededAngelTypes`.*,
                 `Shifts`.`SID`,
@@ -262,7 +262,7 @@ function ShiftEntries_by_ShiftsFilter(ShiftsFilter $shiftsFilter)
         ',
         implode(',', $shiftsFilter->getRooms())
     );
-    return DB::select(
+    return Db::select(
         $sql,
         [
             $shiftsFilter->getStartTime(),
@@ -375,8 +375,8 @@ function Shift_signup_allowed_angel(
 
     if (
         empty($user_angeltype)
-        || ($angeltype['no_self_signup'] == 1 && !empty($user_angeltype))
-        || ($angeltype['restricted'] == 1 && !empty($user_angeltype) && !isset($user_angeltype['confirm_user_id']))
+        || $angeltype['no_self_signup'] == 1
+        || ($angeltype['restricted'] == 1 && !isset($user_angeltype['confirm_user_id']))
     ) {
         // you cannot join if user is not of this angel type
         // you cannot join if you are not confirmed
@@ -513,7 +513,7 @@ function Shift_signup_allowed(
 function Shift_delete($shift_id)
 {
     mail_shift_delete(Shift($shift_id));
-    DB::delete('DELETE FROM `Shifts` WHERE `SID`=?', [$shift_id]);
+    Db::delete('DELETE FROM `Shifts` WHERE `SID`=?', [$shift_id]);
 }
 
 /**
@@ -528,7 +528,7 @@ function Shift_update($shift)
     $shift['name'] = ShiftType($shift['shifttype_id'])['name'];
     mail_shift_change(Shift($shift['SID']), $shift);
 
-    return DB::update('
+    return Db::update('
         UPDATE `Shifts` SET
         `shifttype_id` = ?,
         `start` = ?,
@@ -560,11 +560,12 @@ function Shift_update($shift)
  * Create a new shift.
  *
  * @param array $shift
- * @return int ID of the new created shift
+ * @param int   $transactionId
+ * @return int|false ID of the new created shift
  */
-function Shift_create($shift)
+function Shift_create($shift, $transactionId = null)
 {
-    DB::insert('
+    Db::insert('
         INSERT INTO `Shifts` (
             `shifttype_id`,
             `start`,
@@ -573,11 +574,12 @@ function Shift_create($shift)
             `title`,
             `description`,
             `URL`,
+            `transaction_id`,
             `created_by_user_id`,
             `edited_at_timestamp`,
             `created_at_timestamp`
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ',
         [
             $shift['shifttype_id'],
@@ -587,13 +589,14 @@ function Shift_create($shift)
             $shift['title'],
             $shift['description'],
             $shift['URL'],
+            $transactionId,
             auth()->user()->id,
             time(),
             time(),
         ]
     );
 
-    return DB::getPdo()->lastInsertId();
+    return Db::getPdo()->lastInsertId();
 }
 
 /**
@@ -605,7 +608,7 @@ function Shift_create($shift)
  */
 function Shifts_by_user($userId, $include_freeload_comments = false)
 {
-    return DB::select('
+    return Db::select('
         SELECT
             `rooms`.*,
             `rooms`.name AS Name,
@@ -643,7 +646,7 @@ function Shifts_by_user($userId, $include_freeload_comments = false)
  */
 function Shift($shift_id)
 {
-    $result = DB::selectOne('
+    $result = Db::selectOne('
         SELECT `Shifts`.*, `ShiftTypes`.`name`
         FROM `Shifts`
         JOIN `ShiftTypes` ON (`ShiftTypes`.`id` = `Shifts`.`shifttype_id`)
@@ -653,7 +656,7 @@ function Shift($shift_id)
         return null;
     }
 
-    $shiftsEntry_source = DB::select('
+    $shiftsEntry_source = Db::select('
         SELECT `ShiftEntry`.`id`, `ShiftEntry`.`TID` , `ShiftEntry`.`UID` , `ShiftEntry`.`freeloaded`, `users`.`name` AS `username`
         FROM `ShiftEntry`
         LEFT JOIN `users` ON (`users`.`id` = `ShiftEntry`.`UID`)

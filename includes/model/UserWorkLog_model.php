@@ -2,7 +2,6 @@
 
 use Carbon\Carbon;
 use Engelsystem\Models\Room;
-use Engelsystem\Models\User\User;
 use Engelsystem\Models\Worklog;
 use Illuminate\Support\Collection;
 
@@ -126,9 +125,11 @@ function UserWorkLog_new($userId)
 {
     /** @var Carbon $buildup */
     $buildup = config('buildup_start');
+    /** @var Carbon $event */
+    $event = config('event_start');
 
     $work_date = Carbon::today();
-    if (!empty($buildup)) {
+    if (!empty($buildup) && (empty($event) || $event->lessThan(Carbon::now()))) {
         $work_date = $buildup;
     }
 

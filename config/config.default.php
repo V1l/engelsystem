@@ -271,8 +271,11 @@ return [
     // Enables the T-Shirt configuration on signup and profile
     'enable_tshirt_size'      => (bool)env('ENABLE_TSHIRT_SIZE', true),
 
-    // Enables the goody/voucher configuration on signup and profile
+    // Enables the goody configuration on signup and profile
     'enable_goody'            => (bool)env('ENABLE_GOODY', false),
+
+    // Enables the food voucher in the user profile
+    'enable_voucher'            => (bool)env('ENABLE_VOUCHER', true),
 
     // Number of shifts to freeload until angel is locked for shift signup.
     'max_freeloadable_shifts' => env('MAX_FREELOADABLE_SHIFTS', 2),
@@ -363,7 +366,7 @@ return [
     // A list of credits
     'credits'                 => [
         'Contribution' => 'Please visit [engelsystem/engelsystem](https://github.com/engelsystem/engelsystem) if '
-            . 'you want to to contribute, have found any [bugs](https://github.com/engelsystem/engelsystem/issues) '
+            . 'you want to contribute, have found any [bugs](https://github.com/engelsystem/engelsystem/issues) '
             . 'or need help.'
     ],
 

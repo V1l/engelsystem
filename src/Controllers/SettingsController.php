@@ -99,6 +99,92 @@ class SettingsController extends BaseController
     /**
      * @return Response
      */
+    public function theme(): Response
+    {
+        $themes = array_map(function ($theme) {
+            return $theme['name'];
+        }, config('themes'));
+
+        $currentTheme = $this->auth->user()->settings->theme;
+
+        return $this->response->withView(
+            'pages/settings/theme',
+            [
+                'settings_menu' => $this->settingsMenu(),
+                'themes'        => $themes,
+                'current_theme' => $currentTheme
+            ] + $this->getNotifications()
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function saveTheme(Request $request): Response
+    {
+        $user = $this->auth->user();
+        $data = $this->validate($request, ['select_theme' => 'int']);
+        $selectTheme = $data['select_theme'];
+
+        if (!isset(config('themes')[$selectTheme])) {
+            throw new HttpNotFound('Theme with id ' . $selectTheme . ' does not exist.');
+        }
+
+        $user->settings->theme = $selectTheme;
+        $user->settings->save();
+
+        $this->addNotification('settings.theme.success');
+
+        return $this->redirect->to('/settings/theme');
+    }
+
+    /**
+     * @return Response
+     */
+    public function language(): Response
+    {
+        $languages = config('locales');
+
+        $currentLanguage = $this->auth->user()->settings->language;
+
+        return $this->response->withView(
+            'pages/settings/language',
+            [
+                'settings_menu'    => $this->settingsMenu(),
+                'languages'        => $languages,
+                'current_language' => $currentLanguage
+            ] + $this->getNotifications()
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function saveLanguage(Request $request): Response
+    {
+        $user = $this->auth->user();
+        $data = $this->validate($request, ['select_language' => 'required']);
+        $selectLanguage = $data['select_language'];
+
+        if (!isset(config('locales')[$selectLanguage])) {
+            throw new HttpNotFound('Language ' . $selectLanguage . ' does not exist.');
+        }
+
+        $user->settings->language = $selectLanguage;
+        $user->settings->save();
+
+        session()->set('locale', $selectLanguage);
+
+        $this->addNotification('settings.language.success');
+
+        return $this->redirect->to('/settings/language');
+    }
+
+    /**
+     * @return Response
+     */
     public function oauth(): Response
     {
         $providers = $this->config->get('oauth');
@@ -122,7 +208,9 @@ class SettingsController extends BaseController
     {
         $menu = [
             url('/user-settings')     => 'settings.profile',
-            url('/settings/password') => 'settings.password'
+            url('/settings/password') => 'settings.password',
+            url('/settings/language') => 'settings.language',
+            url('/settings/theme')    => 'settings.theme'
         ];
 
         if (!empty(config('oauth'))) {

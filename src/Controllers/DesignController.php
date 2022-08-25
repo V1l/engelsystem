@@ -3,7 +3,9 @@
 namespace Engelsystem\Controllers;
 
 use Engelsystem\Config\Config;
+use Engelsystem\Helpers\BarChart;
 use Engelsystem\Http\Response;
+use Engelsystem\Models\User\PersonalData;
 use Engelsystem\Models\User\State;
 use Engelsystem\Models\User\User;
 
@@ -48,12 +50,16 @@ class DesignController extends BaseController
             'user_id' => 1337,
             'arrived' => false,
         ]));
+        $demoUser2->__set('personalData', (new PersonalData())->forceFill([
+            'pronoun' => 'it/its',
+        ]));
 
         $themes = $this->config->get('themes');
         $data = [
             'demo_user'   => $demoUser,
             'demo_user_2' => $demoUser2,
             'themes'      => $themes,
+            'bar_chart'   => BarChart::render(...BarChart::generateChartDemoData(23)),
         ];
 
         return $this->response->withView(

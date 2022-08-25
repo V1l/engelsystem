@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Engelsystem\Http\UrlGeneratorInterface;
 use Engelsystem\Models\Room;
 use Engelsystem\Models\User\User;
 use Engelsystem\Models\Worklog;
@@ -13,8 +14,6 @@ use Engelsystem\Controllers\SettingsController;
  * Renders user settings page
  *
  * @param User  $user_source        The user
- * @param array $locales            Available languages
- * @param array $themes             Available themes
  * @param int   $buildup_start_date Unix timestamp
  * @param int   $teardown_end_date  Unix timestamp
  * @param bool  $enable_tshirt_size
@@ -24,8 +23,6 @@ use Engelsystem\Controllers\SettingsController;
  */
 function User_settings_view(
     $user_source,
-    $locales,
-    $themes,
     $buildup_start_date,
     $teardown_end_date,
     $enable_tshirt_size,
@@ -38,6 +35,8 @@ function User_settings_view(
     $enable_planned_arrival = config('enable_planned_arrival');
     $enable_goody = config('enable_goody');
 
+    /** @var $urlGenerator UrlGeneratorInterface */
+    $urlGenerator = app(UrlGeneratorInterface::class);
     /** @var Renderer $renderer */
     $renderer = app(Renderer::class);
     return $renderer->render(
@@ -115,18 +114,14 @@ function User_settings_view(
                                 $personalData->shirt_size,
                                 __('Please select...')
                             ) : '',
-                            form_info('', __('Please visit the angeltypes page to manage your angeltypes.')),
+                            form_info(
+                                '',
+                                __(
+                                    'You can manage your Angeltypes <a href="%s">on the Angeltypes page</a>.',
+                                    [$urlGenerator->to('angeltypes')]
+                                )
+                            ),
                             form_submit('submit', __('Save'))
-                        ]),
-                        form([
-                            form_info(__('Here you can choose your color settings:')),
-                            form_select('theme', __('Color settings:'), $themes, $user_source->settings->theme),
-                            form_submit('submit_theme', __('Save'))
-                        ]),
-                        form([
-                            form_info(__('Here you can choose your language:')),
-                            form_select('language', __('Language:'), $locales, $user_source->settings->language),
-                            form_submit('submit_language', __('Save'))
                         ]),
                     ])
                 ])
@@ -172,7 +167,9 @@ function User_edit_vouchers_view($user)
             button(user_link($user->id), icon('chevron-left') . __('back'))
         ]),
         info(sprintf(
-            __('Angel should receive at least  %d vouchers.'),
+            $user->state->force_active
+                ? __('Angel can receive another %d vouchers and is FA.')
+                : __('Angel can receive another %d vouchers.'),
             User_get_eligable_voucher_count($user)
         ), true),
         form(
@@ -639,15 +636,17 @@ function User_view(
                             form([
                                 form_hidden('action', 'arrived'),
                                 form_hidden('user', $user_source->id),
-                                form_submit('submit', __('arrived'), '', false, 'primary')
+                                form_submit('submit', __('arrived'), '', false)
                             ], page_link_to('admin_arrive'), true) : '',
-                        $admin_user_privilege ? button(
-                            page_link_to(
-                                'users',
-                                ['action' => 'edit_vouchers', 'user_id' => $user_source->id]
-                            ),
-                            icon('file-binary-fill') . __('Edit vouchers')
-                        ) : '',
+                        ($admin_user_privilege || $auth->can('voucher.edit')) && config('enable_voucher') ?
+                            button(
+                                page_link_to(
+                                    'users',
+                                    ['action' => 'edit_vouchers', 'user_id' => $user_source->id]
+                                ),
+                                icon('file-binary-fill') . __('Vouchers')
+                            )
+                        : '',
                         $admin_user_worklog_privilege ? button(
                             user_worklog_add_link($user_source),
                             icon('list') . __('Add work log')
@@ -677,10 +676,21 @@ function User_view(
             ]),
             div('row user-info', [
                 div('col-md-2', [
-                    heading(icon('phone')
-                        . '<a href="tel:' . $user_source->contact->dect . '">'
-                        . $user_source->contact->dect, 1)
-                        . '</a>'
+                    config('enable_dect') ?
+                        heading(
+                            icon('phone')
+                            . ' <a href="tel:' . $user_source->contact->dect . '">'
+                            . $user_source->contact->dect
+                            . '</a>'
+                        )
+                    : '' ,
+                    $auth->can('user_messages') ?
+                        heading(
+                            '<a href="' . page_link_to('/messages/' . $user_source->id) . '">'
+                            . icon('envelope')
+                            . '</a>'
+                        )
+                    : '' ,
                 ]),
                 User_view_state($admin_user_privilege, $freeloader, $user_source),
                 User_angeltypes_render($user_angeltypes),

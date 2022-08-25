@@ -22,6 +22,10 @@ $route->post('/oauth/{provider}/disconnect', 'OAuthController@disconnect');
 // User settings
 $route->get('/settings/password', 'SettingsController@password');
 $route->post('/settings/password', 'SettingsController@savePassword');
+$route->get('/settings/theme', 'SettingsController@theme');
+$route->post('/settings/theme', 'SettingsController@saveTheme');
+$route->get('/settings/language', 'SettingsController@language');
+$route->post('/settings/language', 'SettingsController@saveLanguage');
 $route->get('/settings/oauth', 'SettingsController@oauth');
 
 // Password recovery
@@ -49,6 +53,13 @@ $route->get('/questions', 'QuestionsController@index');
 $route->post('/questions', 'QuestionsController@delete');
 $route->get('/questions/new', 'QuestionsController@add');
 $route->post('/questions/new', 'QuestionsController@save');
+
+// Messages
+$route->get('/messages', 'MessagesController@index');
+$route->post('/messages', 'MessagesController@redirectToConversation');
+$route->get('/messages/{user_id:\d+}', 'MessagesController@messagesOfConversation');
+$route->post('/messages/{user_id:\d+}', 'MessagesController@send');
+$route->post('/messages/{user_id:\d+}/{msg_id:\d+}', 'MessagesController@delete');
 
 // API
 $route->get('/api[/{resource:.+}]', 'ApiController@index');

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Engelsystem\Controllers\Admin\Schedule;
 
 use Carbon\Carbon;
+use DateTimeInterface;
 use Engelsystem\Controllers\BaseController;
-use Engelsystem\Controllers\CleanupModel;
 use Engelsystem\Controllers\HasUserNotifications;
 use Engelsystem\Helpers\Schedule\Event;
 use Engelsystem\Helpers\Schedule\Room;
@@ -29,7 +29,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class ImportSchedule extends BaseController
 {
-    use CleanupModel;
     use HasUserNotifications;
 
     /** @var DatabaseConnection */
@@ -104,7 +103,6 @@ class ImportSchedule extends BaseController
     public function edit(Request $request): Response
     {
         $schedule = ScheduleUrl::find($request->getAttribute('id'));
-        $this->cleanupModelNullValues($schedule);
 
         return $this->response->withView(
             'admin/schedule/edit.twig',
@@ -250,7 +248,7 @@ class ImportSchedule extends BaseController
         foreach ($newEvents as $event) {
             $this->createEvent(
                 $event,
-                (int)$shiftType,
+                $shiftType,
                 $rooms
                     ->where('name', $event->getRoom()->getName())
                     ->first(),
@@ -261,7 +259,7 @@ class ImportSchedule extends BaseController
         foreach ($changeEvents as $event) {
             $this->updateEvent(
                 $event,
-                (int)$shiftType,
+                $shiftType,
                 $rooms
                     ->where('name', $event->getRoom()->getName())
                     ->first()
@@ -329,8 +327,8 @@ class ImportSchedule extends BaseController
             [
                 'shift' => $shift->getTitle(),
                 'room'  => $room->name,
-                'from'  => $shift->getDate()->format(Carbon::RFC3339),
-                'to'    => $shift->getEndDate()->format(Carbon::RFC3339),
+                'from'  => $shift->getDate()->format(DateTimeInterface::RFC3339),
+                'to'    => $shift->getEndDate()->format(DateTimeInterface::RFC3339),
                 'guid'  => $shift->getGuid(),
             ]
         );
@@ -367,8 +365,8 @@ class ImportSchedule extends BaseController
             [
                 'shift' => $shift->getTitle(),
                 'room'  => $room->name,
-                'from'  => $shift->getDate()->format(Carbon::RFC3339),
-                'to'    => $shift->getEndDate()->format(Carbon::RFC3339),
+                'from'  => $shift->getDate()->format(DateTimeInterface::RFC3339),
+                'to'    => $shift->getEndDate()->format(DateTimeInterface::RFC3339),
                 'guid'  => $shift->getGuid(),
             ]
         );
@@ -389,8 +387,8 @@ class ImportSchedule extends BaseController
             'Deleted schedule shift "{shift}" ({from} {to}, {guid})',
             [
                 'shift' => $shift->getTitle(),
-                'from'  => $shift->getDate()->format(Carbon::RFC3339),
-                'to'    => $shift->getEndDate()->format(Carbon::RFC3339),
+                'from'  => $shift->getDate()->format(DateTimeInterface::RFC3339),
+                'to'    => $shift->getEndDate()->format(DateTimeInterface::RFC3339),
                 'guid'  => $shift->getGuid(),
             ]
         );
@@ -398,7 +396,7 @@ class ImportSchedule extends BaseController
 
     /**
      * @param Request $request
-     * @return Event[]|Room[]|RoomModel[]|ScheduleUrl|Schedule|string
+     * @return Event[]|Room[]|RoomModel[]
      * @throws ErrorException
      */
     protected function getScheduleData(Request $request)
@@ -531,7 +529,7 @@ class ImportSchedule extends BaseController
         $end = Carbon::createFromTimestamp($shift->end);
         $duration = $start->diff($end);
 
-        $event = new Event(
+        return new Event(
             $scheduleShift->guid,
             0,
             new Room($shift->room_name),
@@ -545,8 +543,6 @@ class ImportSchedule extends BaseController
             '',
             ''
         );
-
-        return $event;
     }
 
     /**

@@ -531,6 +531,18 @@ msgstr "Benötigte Engel"
 msgid "Shift deleted."
 msgstr "Schicht gelöscht."
 
+msgid "Shifts history"
+msgstr "Schichten Historie"
+
+msgid "%s shifts deleted."
+msgstr "%s Schichten gelöscht."
+
+msgid "Created"
+msgstr "Erstellt"
+
+msgid "delete all"
+msgstr "alle löschen"
+
 #: includes/controller/shifts_controller.php:238
 #, php-format
 msgid "Do you want to delete the shift %s from %s to %s?"
@@ -765,8 +777,8 @@ msgid "Please enter work date."
 msgstr "Bitte Einsatzdatum angeben."
 
 #: includes/controller/user_worklog_controller.php:87
-msgid "Please enter work hours in format ##[.##]."
-msgstr "Bitte Stunden im Format ##[.##| eingeben."
+msgid "Please enter work hours in format ##[.##]"
+msgstr "Bitte Stunden im Format ##[.##] eingeben."
 
 #: includes/controller/user_worklog_controller.php:93
 msgid "Please enter a comment."
@@ -1039,7 +1051,7 @@ msgstr "Aktiv?"
 
 #: includes/pages/admin_active.php:320 includes/view/User_view.php:231
 msgid "Forced"
-msgstr "Gezwungen"
+msgstr "Erzwungen"
 
 #: includes/pages/admin_active.php:321
 msgid "T-shirt?"
@@ -1307,10 +1319,6 @@ msgstr "Zu löschende Schichten"
 #: includes/pages/admin_import.php:297
 msgid "It's done!"
 msgstr "Erledigt!"
-
-#: includes/pages/user_messages.php:121
-msgid "Message"
-msgstr "Nachricht"
 
 #: includes/pages/admin_rooms.php:202
 #: includes/view/User_view.php:129
@@ -1694,10 +1702,6 @@ msgstr "Nachname"
 msgid "Entry required!"
 msgstr "Pflichtfeld!"
 
-#: includes/pages/user_messages.php:11
-msgid "Messages"
-msgstr "Nachrichten"
-
 #: includes/pages/user_messages.php:49
 msgid "Select recipient..."
 msgstr "Empfänger auswählen..."
@@ -1834,10 +1838,6 @@ msgstr "-> Nicht OK. Bitte erneut versuchen."
 #: includes/pages/user_settings.php:115
 msgid "Your password is to short (please use at least 6 characters)."
 msgstr "Dein Passwort ist zu kurz (Bitte mindestens 6 Zeichen nutzen)."
-
-#: includes/pages/user_settings.php:146
-msgid "Theme changed."
-msgstr "Aussehen geändert."
 
 #: includes/pages/user_shifts.php:101
 msgid "The administration has not configured any rooms yet."
@@ -2527,24 +2527,8 @@ msgid "Planned date of departure"
 msgstr "Geplanter Abreisetag"
 
 #: includes/view/User_view.php:83
-msgid "Please visit the angeltypes page to manage your angeltypes."
-msgstr "Bitte benutze die Engeltypen-Seite um deine Engeltypen zu verwalten."
-
-#: includes/view/User_view.php:96
-msgid "Here you can choose your color settings:"
-msgstr "Hier kannst Du das Aussehen auswählen:"
-
-#: includes/view/User_view.php:97
-msgid "Color settings:"
-msgstr "Aussehen:"
-
-#: includes/view/User_view.php:101
-msgid "Here you can choose your language:"
-msgstr "Hier kannst Du Deine Sprache auswählen:"
-
-#: includes/view/User_view.php:102
-msgid "Language:"
-msgstr "Sprache:"
+msgid "You can manage your Angeltypes <a href=\"%s\">on the Angeltypes page</a>."
+msgstr "Du kannst deine Engeltypen <a href=\"%s\">auf der Engeltypen-Seite</a> verwalten."
 
 #: includes/view/User_view.php:124
 msgid ""
@@ -2560,8 +2544,13 @@ msgstr "Dein Passwort"
 
 #: includes/view/User_view.php:148
 #, php-format
-msgid "Angel should receive at least  %d vouchers."
-msgstr "Engel sollte mindestens %d Gutscheine bekommen."
+msgid "Angel can receive another %d vouchers."
+msgstr "Engel kann noch %d Gutscheine bekommen."
+
+#: includes/view/User_view.php:148
+#, php-format
+msgid "Angel can receive another %d vouchers and is FA."
+msgstr "Engel kann noch %d Gutscheine bekommen und ist FA."
 
 #: includes/view/User_view.php:153
 msgid "Number of vouchers given out"
@@ -2669,8 +2658,8 @@ msgid "driving license"
 msgstr "Führerschein"
 
 #: includes/view/User_view.php:608
-msgid "Edit vouchers"
-msgstr "Gutschein bearbeiten"
+msgid "Vouchers"
+msgstr "Gutscheine"
 
 #: includes/view/User_view.php:612
 msgid "Add work log"
@@ -2717,7 +2706,7 @@ msgstr "Angekommen am %s"
 
 #: includes/view/User_view.php:732
 msgid "Active (forced)"
-msgstr "Aktiv (gezwungen)"
+msgstr "Aktiv (erzwungen)"
 
 #: includes/view/User_view.php:743
 #, php-format
@@ -2973,6 +2962,24 @@ msgstr "Passwort wiederholen"
 msgid "settings.password.success"
 msgstr "Passwort wurde erfolgreich geändert."
 
+msgid "settings.theme"
+msgstr "Theme"
+
+msgid "settings.theme.info"
+msgstr "Hier kannst Du Dein Theme ändern."
+
+msgid "settings.theme.success"
+msgstr "Theme wurde erfolgreich geändert."
+
+msgid "settings.language"
+msgstr "Sprache"
+
+msgid "settings.language.info"
+msgstr "Hier kannst Du Deine Sprache ändern."
+
+msgid "settings.language.success"
+msgstr "Sprache wurde erfolgreich geändert."
+
 msgid "settings.oauth"
 msgstr "Single Sign-On"
 
@@ -3047,3 +3054,21 @@ msgstr "Angekommen"
 
 msgid "user.got_shirt"
 msgstr "Shirt bekommen"
+
+msgid "message.title"
+msgstr "Nachrichten"
+
+msgid "message.choose_angel"
+msgstr "Wähle einen Engel"
+
+msgid "message.to_conversation"
+msgstr "Zur Konversation"
+
+msgid "message.message"
+msgstr "Nachricht"
+
+msgid "angel"
+msgstr "Engel"
+
+msgid "date"
+msgstr "Datum"
