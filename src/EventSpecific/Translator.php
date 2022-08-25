@@ -9,14 +9,18 @@ class Translator extends EngelsystemTranslator
     /** @var array */
     protected $replacements = [
         // EN
+        'got t-shirt' => 'has Pfand',
+        'remove t-shirt' => 'remove Pfand',
+
+
+
+        // DE
         'Supporter' => 'Chief',
         'T-Shirt' => 'Ticket-Pfand',
         'Shirt' => 'Ticket-Pfand',
         'Ticket größe' => 'Ticket-Pfand',
-
-
-        // DE
-        
+        'hat t-shirt' => 'hat Pfand',
+        'entferne t-shirt' => 'Pfand entfernen',
     ];
 
     /**
