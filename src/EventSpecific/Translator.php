@@ -12,8 +12,6 @@ class Translator extends EngelsystemTranslator
         'got t-shirt' => 'has Pfand',
         'remove t-shirt' => 'remove Pfand',
 
-
-
         // DE
         'Supporter' => 'Chief',
         'T-Shirt' => 'Ticket-Pfand',

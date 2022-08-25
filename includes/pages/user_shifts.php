@@ -48,23 +48,14 @@ function user_shifts()
  */
 function update_ShiftsFilter_timerange(ShiftsFilter $shiftsFilter, $days)
 {
-    $start_time = $shiftsFilter->getStartTime();
+ $start_time = $shiftsFilter->getStartTime();
     if (is_null($start_time)) {
-        $now = (new DateTime())->format('Y-m-d');
-        $first_day = DateTime::createFromFormat(
-            'Y-m-d',
-            in_array($now, $days) ? $now : ($days[0] ?? (new DateTime())->format('Y-m-d'))
-        )->getTimestamp();
-        if (time() < $first_day) {
-            $start_time = $first_day;
-        } else {
-            $start_time = time();
-        }
+        $start_time = (new DateTime())->setDate(2022, 9, 1)->getTimestamp();
     }
 
     $end_time = $shiftsFilter->getEndTime();
     if (is_null($end_time)) {
-        $end_time = $start_time + 24 * 60 * 60;
+        $end_time = $start_time + 5 * 24 * 60 * 60;
         $end = Carbon::createFromTimestamp($end_time);
         if (!in_array($end->format('Y-m-d'), $days)) {
             $end->startOfDay()->subSecond(); // the day before
